@@ -15,7 +15,7 @@
 
 When opening the project for the first time, select the `Visual Studio` toolchain and not `MinGW`.
 
-Install vcpkg if you don't have it on your Windows system.
+Install vcpkg if you don't have it on your Windows system pasting this line below in the terminal:
 ```bash
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
@@ -32,9 +32,20 @@ After the installation, in your **Project Folder**, run:
 cmake -B build -DCMAKE_TOOLCHAIN_FILE= your_vcpkg_path+"scripts/buildsystems/vcpkg.cmake"
 cmake --build build
 ```
-**IMPORTANT**: If the cmake command is not found, in the [Installation](Installation) folder, there is the msi file to install it.
+**IMPORTANT**: If the cmake command is not found, in the [Installation](Installation/cmake-4.2.0-rc1-windows-x86_64.msi) folder, there is the `.msi` file to install it.
 
 #### On macOS 
+You need Homebrew to install dependencies.
+If you don't have it, install it by running this command in the terminal:
+```bash
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+To check if everything is correct, run (after reopening the terminal):
+```bash
+  brew --version
+```
+If the installation was successful it should print something like: `Homebrew 4.x.x`
+
 Use brew to install dependencies:
 ```bash
   brew install assimp glfw freetype libsndfile
