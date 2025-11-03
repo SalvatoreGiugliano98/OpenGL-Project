@@ -1,29 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 
-if (WIN32)
-    message(STATUS "Using vcpkg toolchain on Windows")
-    set(CMAKE_TOOLCHAIN_FILE "C:/Users/salva/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-endif()
+# === Project name ===
 #TODO: Change it to your project Name
 set(APP_NAME "Your_Project")
-
-
-project(${APP_NAME})
-
+project(${APP_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
-# === Include directories ===
-include_directories(
-        .
-        OpenGLApp
-        OpenGLApp/DataClasses
-        OpenGLApp/GameClasses
-        OpenGLApp/ViewController
-        glad/include
-        glm-master
-)
-
-if(APPLE)
+if (WIN32)
+    message(STATUS "Using vcpkg toolchain on Windows")
+    #TODO: Change the path to your vcpkg installation
+    set(CMAKE_TOOLCHAIN_FILE "C:/Users/salva/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif (APPLE)
     # Rileva l'architettura attuale: x86_64 (Intel) oppure arm64 (Apple Silicon)
     execute_process(
             COMMAND uname -m
@@ -58,22 +45,7 @@ if(APPLE)
                 /usr/local/opt/glfw/lib
         )
     endif()
-
-elseif(WIN32)
-    message(STATUS "Using vcpkg on Windows — no manual include/link needed")
 endif()
-
-
-# === Find core packages ===
-find_package(OpenGL REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(SndFile REQUIRED)
-if (WIN32)
-    find_package(assimp CONFIG REQUIRED)
-    find_package(glfw3 CONFIG REQUIRED)
-    find_package(OpenAL CONFIG REQUIRED)
-endif()
-
 
 # === Collect all source files ===
 file(GLOB_RECURSE APP_SOURCES
@@ -84,6 +56,7 @@ file(GLOB_RECURSE APP_SOURCES
         "glad/src/*.c"
 )
 
+
 # === Create executable ===
 if (APPLE)
     add_executable(${APP_NAME} ${APP_SOURCES} OpenGLApp)
@@ -93,11 +66,29 @@ elseif (WIN32)
             OpenGLApp
             OpenGLApp/app_icon.rc
     )
+elseif (UNIX AND NOT APPLE)
+    add_executable(${APP_NAME} ${APP_SOURCES} OpenGLApp)
 endif ()
 
-# === Link core libraries ===
+# 🔧 Include directories assegnati correttamente al target
+target_include_directories(${APP_NAME} PRIVATE
+        .
+        OpenGLApp
+        OpenGLApp/DataClasses
+        OpenGLApp/GameClasses
+        OpenGLApp/ViewController
+        glad/include
+        glm-master
+)
 
+# === Link libraries ===
 if (WIN32)
+    find_package(OpenGL REQUIRED)
+    find_package(Freetype REQUIRED)
+    find_package(SndFile REQUIRED)
+    find_package(assimp CONFIG REQUIRED)
+    find_package(glfw3 CONFIG REQUIRED)
+    find_package(OpenAL CONFIG REQUIRED)
     target_link_libraries(${APP_NAME} PRIVATE
             assimp::assimp
             OpenGL::GL
@@ -106,7 +97,10 @@ if (WIN32)
             SndFile::sndfile
             OpenAL::OpenAL
     )
-elseif (APPLE)
+elseif(APPLE)
+    find_package(OpenGL REQUIRED)
+    find_package(Freetype REQUIRED)
+    find_package(SndFile REQUIRED)
     target_link_libraries(${APP_NAME}
             PRIVATE
             ${OPENGL_LIBRARIES}
@@ -119,6 +113,23 @@ elseif (APPLE)
             "-framework IOKit"
             "-framework CoreVideo"
     )
+elseif(UNIX AND NOT APPLE)
+    find_package(OpenGL REQUIRED)
+    find_package(Freetype REQUIRED)
+    find_package(assimp REQUIRED)
+    find_package(glfw3 REQUIRED)
+    find_package(OpenAL REQUIRED)
+    find_package(SndFile REQUIRED)
+
+    target_link_libraries(${APP_NAME} PRIVATE
+            ${OPENGL_LIBRARIES}
+            glfw
+            assimp
+            freetype
+            ${SNDFILE_LIBRARIES}
+            ${OPENAL_LIBRARIES}
+            dl pthread
+    )
 endif()
 
 # === Create a macOS .app bundle and assign the app icon ===
@@ -127,6 +138,14 @@ if(APPLE)
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_ICON_FILE Icon.icns)
 endif ()
+
+# === Imposta il path assoluto delle risorse come macro ===
+if(APPLE OR WIN32)
+    target_compile_definitions(${APP_NAME} PRIVATE RESOURCE_PATH="../resources")
+else()
+    target_compile_definitions(${APP_NAME} PRIVATE RESOURCE_PATH="resources")
+endif()
+
 # === Post-build actions ===
 if(APPLE)
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
@@ -137,7 +156,7 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/OpenGLApp/resources/Icon/Icon.icns
             ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/Resources/Icon.icns
     )
-elseif(WIN32)
+elseif(WIN32 OR (UNIX AND NOT APPLE))
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/OpenGLApp/resources
@@ -145,13 +164,11 @@ elseif(WIN32)
     )
 endif()
 
-
-
-# === Neat output summary ===
+# === Build summary ===
 message(STATUS "---- BUILD CONFIGURATION ----")
 message(STATUS "OpenGL: ${OPENGL_LIBRARIES}")
 message(STATUS "FreeType: ${FREETYPE_LIBRARIES}")
-message(STATUS "Assimp: /usr/local/opt/assimp/lib/libassimp.dylib")
-message(STATUS "GLFW: /usr/local/opt/glfw/lib/libglfw.3.dylib")
+message(STATUS "Assimp: ${ASSIMP_LIBRARIES}")
+message(STATUS "GLFW: ${GLFW_LIBRARIES}")
 message(STATUS "SndFile: ${SNDFILE_LIBRARIES}")
 message(STATUS "-----------------------------")
