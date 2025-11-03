@@ -64,8 +64,7 @@ GLFWwindow* setWindow();
 // Function to load the font type
 int loadFont(const std::string& font_name);
 
-// Function to link the relative path to the full path
-inline std::string getResource(const std::string& relativePath);
+
 
 Button startButton;
 
@@ -102,6 +101,7 @@ int main()
         return 0;
 }
 
+// Function to link the relative path to the full path
 inline std::string getResource(const std::string& relativePath) {
     return std::string(RESOURCE_PATH) + "/" + relativePath;
 }

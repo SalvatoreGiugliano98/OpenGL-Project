@@ -160,7 +160,7 @@ After installing all dependencies, you can build and run the project on your ope
    cmake --build build
     ```
    Or use the build functions of your IDE.
-3. Run the executable file in the [build](cmake-build-debug-visual-studio/Debug) folder.
+3. Run the executable file in the [build](cmake-build-debug) folder.
 
 ### 🍎 On macOS
 1. Open a terminal in your project directory.
@@ -170,7 +170,7 @@ After installing all dependencies, you can build and run the project on your ope
    cmake --build build
     ```
    Or use the build functions of your IDE.
-3. Run the .app bundle in the [build](cmake-build-debug/Debug) folder.
+3. Run the .app bundle in the [build](cmake-build-debug) folder.
 
 ### 🐧 On Linux
 1. Open a terminal in your project directory.

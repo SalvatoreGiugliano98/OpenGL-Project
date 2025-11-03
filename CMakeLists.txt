@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
-
+if (WIN32)
+    message(STATUS "Using vcpkg toolchain on Windows")
+    #TODO: Change the path to your vcpkg installation
+    set(CMAKE_TOOLCHAIN_FILE "C:/Users/salva/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+endif ()
 # === Project name ===
 #TODO: Change it to your project Name
 set(APP_NAME "Your_Project")
 project(${APP_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
-if (WIN32)
-    message(STATUS "Using vcpkg toolchain on Windows")
-    #TODO: Change the path to your vcpkg installation
-    set(CMAKE_TOOLCHAIN_FILE "C:/Users/salva/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-elseif (APPLE)
+if (APPLE)
     # Rileva l'architettura attuale: x86_64 (Intel) oppure arm64 (Apple Silicon)
     execute_process(
             COMMAND uname -m
@@ -59,18 +59,22 @@ file(GLOB_RECURSE APP_SOURCES
 
 # === Create executable ===
 if (APPLE)
+    message(STATUS "Create executable on Apple")
     add_executable(${APP_NAME} ${APP_SOURCES} OpenGLApp)
 elseif (WIN32)
+    message(STATUS "Create executable on Windows")
     add_executable(${APP_NAME}
             ${APP_SOURCES}
             OpenGLApp
             OpenGLApp/app_icon.rc
     )
 elseif (UNIX AND NOT APPLE)
+    message(STATUS "Create executable on Linux")
     add_executable(${APP_NAME} ${APP_SOURCES} OpenGLApp)
 endif ()
 
 # 🔧 Include directories assegnati correttamente al target
+message(STATUS "Include directories")
 target_include_directories(${APP_NAME} PRIVATE
         .
         OpenGLApp
@@ -83,6 +87,7 @@ target_include_directories(${APP_NAME} PRIVATE
 
 # === Link libraries ===
 if (WIN32)
+    message(STATUS "Link directories on Windows")
     find_package(OpenGL REQUIRED)
     find_package(Freetype REQUIRED)
     find_package(SndFile REQUIRED)
@@ -98,6 +103,7 @@ if (WIN32)
             OpenAL::OpenAL
     )
 elseif(APPLE)
+    message(STATUS "Link directories on Apple")
     find_package(OpenGL REQUIRED)
     find_package(Freetype REQUIRED)
     find_package(SndFile REQUIRED)
@@ -114,6 +120,7 @@ elseif(APPLE)
             "-framework CoreVideo"
     )
 elseif(UNIX AND NOT APPLE)
+    message(STATUS "Link directories on Linux")
     find_package(OpenGL REQUIRED)
     find_package(Freetype REQUIRED)
     find_package(assimp REQUIRED)
@@ -134,20 +141,24 @@ endif()
 
 # === Create a macOS .app bundle and assign the app icon ===
 if(APPLE)
-        set_target_properties(${APP_NAME} PROPERTIES
-        MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_ICON_FILE Icon.icns)
+    message(STATUS "Create a macOS .app bundle")
+    set_target_properties(${APP_NAME} PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE Icon.icns)
 endif ()
 
-# === Imposta il path assoluto delle risorse come macro ===
-if(APPLE OR WIN32)
+# === Create the absolute path for the resource folder as C++ macro ===
+if(APPLE)
+    message(STATUS " Create the absolute path for the resource on APPLE/Windows")
     target_compile_definitions(${APP_NAME} PRIVATE RESOURCE_PATH="../resources")
 else()
+    message(STATUS " Create the absolute path for the resource on Linux")
     target_compile_definitions(${APP_NAME} PRIVATE RESOURCE_PATH="resources")
 endif()
 
 # === Post-build actions ===
 if(APPLE)
+    message(STATUS "Post-build actions on Apple")
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/OpenGLApp/resources
@@ -157,6 +168,7 @@ if(APPLE)
             ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/Resources/Icon.icns
     )
 elseif(WIN32 OR (UNIX AND NOT APPLE))
+    message(STATUS "Post-build actions on Windows/Linux")
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/OpenGLApp/resources
