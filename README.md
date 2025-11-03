@@ -106,10 +106,7 @@ If you do, you will have to change the path in the CMakeLists.txt file.
 
 ## Loading Resources
 
-To make the project work, keep the directories struct of `glad` and `glm-master` in the root directory.
-Then in the `OpenGLApp` folder you can find your `Main.cpp` file and in this directory you can add all your custom files.
-
-**IMPORTANT**: The [resources](OpenGLApp/resources) directory must be in the same directory as the [Main.cpp](OpenGLApp/Main.cpp) file.
+The [resources](OpenGLApp/resources) directory must be in the same directory as the [Main.cpp](OpenGLApp/Main.cpp) file.
 To load a resource, you have to use the function:
 ```c++
 inline std::string getResource(const std::string& relativePath)
