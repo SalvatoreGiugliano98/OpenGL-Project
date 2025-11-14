@@ -39,6 +39,7 @@ You are expected to customize the app name and add your own gameplay and renderi
 ## Stack and Requirements
 - Language: C++14 (set via `CMAKE_CXX_STANDARD 14`)
 - Build system: CMake (minimum 3.10)
+- IDE: CLion
 - Graphics: OpenGL
 - Core libraries:
   - GLFW (window/context/input)
@@ -51,8 +52,6 @@ You are expected to customize the app name and add your own gameplay and renderi
   - Windows: vcpkg
   - macOS: Homebrew
   - Linux: apt
-
-Tools/IDEs: CLion, Visual Studio, Xcode, or any CMake-capable environment.
 
 ---
 
@@ -84,14 +83,19 @@ Notes:
    cd vcpkg
    .\bootstrap-vcpkg.bat
    ```
-2. Install dependencies (from the vcpkg directory):
+2. Install dependencies (from the **vcpkg directory**):
    ```powershell
    .\vcpkg.exe install freetype:x64-windows assimp:x64-windows glfw3:x64-windows openal-soft:x64-windows libsndfile:x64-windows
    ```
-3. Configure the project (from your project root):
-   ```powershell
-   cmake -B build -DCMAKE_TOOLCHAIN_FILE=C:/Users/<YOUR_USER>/vcpkg/scripts/buildsystems/vcpkg.cmake
-   ```
+3. Configure the project (from the **project root**):
+    - Either set the toolchain on the command line:
+      ```powershell
+      cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:/Users/<YOUR_USER>/vcpkg/scripts/buildsystems/vcpkg.cmake
+      ```
+    - Or edit `CMakeLists.txt` and set:
+      ```cmake
+      set(CMAKE_TOOLCHAIN_FILE "C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+      ```
    - If `cmake` is not found, see the installer under `Installation/`.
 4. Edit `CMakeLists.txt`:
    - Set your vcpkg toolchain path if different: `set(CMAKE_TOOLCHAIN_FILE "C:/.../vcpkg.cmake")`.
@@ -105,10 +109,6 @@ Notes:
 2. Install dependencies:
    ```bash
    brew install assimp glfw freetype libsndfile
-   ```
-3. Configure:
-   ```bash
-   cmake -B build
    ```
    - `CMakeLists.txt` auto-detects Apple Silicon or Intel and sets include/link directories accordingly.
 
@@ -134,15 +134,13 @@ Notes:
 ## Build and Run
 From the project root after configuration:
 
-```bash
-cmake --build build
-```
-
 - Windows: run the produced `.exe` under your build directory (e.g., `cmake-build-debug` or `build`).
 - macOS: a `.app` bundle is created; resources are copied into the bundle.
 - Linux/Windows: resources are copied next to the executable (`resources/`).
 
 IDE tip: You can also use your IDE’s build/run buttons; they call CMake behind the scenes.
+
+**IMPORTANT:** Sometimes CMake fails to detect the correct toolchain. If this happens, delete the `cmake-build-debug` folder and re-build the `CMakeLists.txt`.
 
 ---
 
